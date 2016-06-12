@@ -49,6 +49,7 @@ namespace LitJson
         private int                  indent_value;
         private StringBuilder        inst_string_builder;
         private bool                 pretty_print;
+        private bool                 hide_unicode;
         private bool                 validate;
         private TextWriter           writer;
         #endregion
@@ -66,6 +67,11 @@ namespace LitJson
         public bool PrettyPrint {
             get { return pretty_print; }
             set { pretty_print = value; }
+        }
+        
+        public bool HideUnicode {
+            get { return hide_unicode; }
+            set { hide_unicode = value; }
         }
 
         public TextWriter TextWriter {
@@ -166,6 +172,7 @@ namespace LitJson
             indent_value = 4;
             pretty_print = false;
             validate = true;
+            hide_unicode = false;
 
             ctx_stack = new Stack<WriterContext> ();
             context = new WriterContext ();
@@ -261,9 +268,17 @@ namespace LitJson
                 }
 
                 // Default, turn into a \uXXXX sequence
-                IntToHex ((int) str[i], hex_seq);
-                writer.Write ("\\u");
-                writer.Write (hex_seq);
+                if (hide_unicode)
+                {
+                    IntToHex ((int) str[i], hex_seq);
+                    writer.Write ("\\u");
+                    writer.Write (hex_seq);
+                }
+                else
+                {
+                    writer.Write (str[i]);
+                }
+                
             }
 
             writer.Write ('"');
